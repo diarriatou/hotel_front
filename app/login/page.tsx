@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { authService } from '@/services/authService';
 
 const PageContainer = styled.div`
   display: flex;
@@ -12,9 +10,10 @@ const PageContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   background-color: #3c3c3c;
+  padding: 20px;
 `;
 
-const LogoText = styled.div`
+const Logo = styled.div`
   color: white;
   font-size: 24px;
   font-weight: 600;
@@ -30,7 +29,7 @@ const FormContainer = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const TitleText = styled.h1`
+const Title = styled.h1`
   text-align: center;
   color: #3c3c3c;
   margin-bottom: 1.5rem;
@@ -82,7 +81,7 @@ const CheckboxLabel = styled.label`
   font-size: 0.9rem;
 `;
 
-const StyledLink = styled(Link)`
+const StyledLinkYellow = styled(Link)`
   display: block;
   text-align: center;
   margin-top: 1rem;
@@ -93,7 +92,7 @@ const StyledLink = styled(Link)`
   &:hover {
     text-decoration: underline;
   }
-`
+`;
 
 const SignUpContainer = styled.div`
   text-align: center;
@@ -102,112 +101,104 @@ const SignUpContainer = styled.div`
   font-size: 0.9rem;
 `;
 
-const RegisterLink = styled(Link)`
+const StyledLinkYellowInline = styled.a`
   color: #f1c40f;
   text-decoration: none;
+  cursor: pointer;
   
   &:hover {
     text-decoration: underline;
   }
 `;
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+const Login = () => {
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true)
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
+    //console.log('Connexion:', { email, password, rememberMe });
+    const formData = {email: email, password: password }
+    
     try {
-      const response = await authService.login(formData.email, formData.password);
-      
-      if (response.success && response.data?.token) {
-        console.log('Connexion réussie');
-        router.push('/dashboard');
-      } else {
-        setError(response.error || 'Erreur de connexion');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+        ...formData
+        })
+      });
+
+      const data = await response.json();
+      if(data.success && data?.data.token) {
+        localStorage.setItem('userInfos', JSON.stringify(data.data))
+        window.location.href = '/dashboard';
+      } else if(data?.success === false && data.error) {
+        window.alert(data.error)
       }
-    } catch (err: any) {
-      console.error('Erreur de connexion:', err);
-      setError('Erreur lors de la connexion');
+      else {
+        window.alert('Impossible de se connecter')
+      }
+    } catch (error) {
+      console.log(error)
+      window.alert('Impossible de se connecter')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
 
   return (
     <PageContainer>
-      <LogoText>RED PRODUCT</LogoText>
+      <Logo>RED PRODUCT</Logo>
       <FormContainer>
-        <TitleText>Connectez-vous en tant que Admin</TitleText>
-        
-        {error && (
-          <div style={{
-            color: 'red',
-            backgroundColor: '#ffebee',
-            padding: '10px',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            {error}
-          </div>
-        )}
-
+        <Title>Connectez-vous en tant que Admin</Title>
         <form onSubmit={handleSubmit}>
           <Input
             type="email"
-            name="email"
             placeholder="E-mail"
-            value={formData.email}
-            onChange={handleChange}
-            disabled={loading}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <Input
             type="password"
-            name="password"
             placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={loading}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button 
-            type="submit" 
-            disabled={loading}
-            style={{ opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? 'Connexion...' : 'Se connecter'}
+          <CheckboxContainer>
+            <Checkbox
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <CheckboxLabel>Gardez-moi connecté</CheckboxLabel>
+          </CheckboxContainer>
+          <Button type="submit">
+            {
+              loading ? 'Connexion en cours' : 'Se connecter'
+            }
           </Button>
         </form>
-
-        <StyledLink href="/forgot-password">
+        <StyledLinkYellow href="/forgot-password">
           Mot de passe oublié?
-        </StyledLink>
-
+        </StyledLinkYellow>
         <SignUpContainer>
-          <span>Vous n'avez pas de compte? </span>
-          <RegisterLink href="/register">
-            S'inscrire
-          </RegisterLink>
+          Vous navez pas de compte?{' '}
+          <StyledLinkYellowInline href="/register">
+            Sinscrire
+          </StyledLinkYellowInline>
         </SignUpContainer>
       </FormContainer>
     </PageContainer>
   );
-}
+};
+
+export default Login;
