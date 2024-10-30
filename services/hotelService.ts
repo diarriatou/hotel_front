@@ -23,6 +23,7 @@ export const hotelService = {
         success: true,
         data: response.data.data || []
       };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('getAllHotels error:', error);
       return {
