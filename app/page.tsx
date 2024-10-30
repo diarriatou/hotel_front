@@ -66,22 +66,6 @@ const Button = styled.button`
   }
 `;
 
-const CheckboxContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const Checkbox = styled.input`
-  margin-right: 0.5rem;
-  cursor: pointer;
-`;
-
-const CheckboxLabel = styled.label`
-  color: #3c3c3c;
-  font-size: 0.9rem;
-`;
-
 const StyledLink = styled(Link)`
   display: block;
   text-align: center;
@@ -142,6 +126,7 @@ export default function LoginPage() {
       } else {
         setError(response.error || 'Erreur de connexion');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Erreur de connexion:', err);
       setError('Erreur lors de la connexion');
@@ -202,9 +187,9 @@ export default function LoginPage() {
         </StyledLink>
 
         <SignUpContainer>
-          <span>Vous n'avez pas de compte? </span>
+          <span>Vous n&apos;avez pas de compte? </span>
           <RegisterLink href="/register">
-            S'inscrire
+            S&apos;inscrire
           </RegisterLink>
         </SignUpContainer>
       </FormContainer>

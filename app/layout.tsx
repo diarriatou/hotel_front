@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 // Routes qui ne doivent pas avoir de sidebar
-const publicRoutes = ['/', '/login', '/register', '/forgot-password','/newhotel'];
+//const publicRoutes = ['/', '/login', '/register', '/forgot-password','/newhotel'];
 
 export default function RootLayout({
   children,
